@@ -1,0 +1,8 @@
+model:
+  # path: "models/base/llama-2-7b.Q4_K_M.gguf"
+  path: "models/base/Qwen3-1.7B-Q4_K_M.gguf"
+  n_ctx: 2048
+
+rag:
+  chunk_size: 1000
+  embedding_model: "sentence-transformers/all-MiniLM-L6-v2"

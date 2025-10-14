@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+pydantic
+langchain
+chromadb
+sentence-transformers
+openai            # if you use OpenAI
+llama-cpp-python  # if using local Llama via llama-cpp-python
+ollama            # if you use Ollama (cli / py client)
+gunicorn
+python-multipart  # file uploads
+requests
+tqdm
