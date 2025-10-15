@@ -29,25 +29,27 @@ class QueryRag():
         self.query = query
         self.collection_name = rag_config['COLLECTION_NAME']
         # chroma_client = chromadb.PersistentClient(path="data/embeddings")
-        print(f'*** LOasing Embeding MOdel: {self.embedder_model}')
+        print(f'*** Loading Embeding MOdel: {Path(self.embedder_model).name}')
         self.embedder = SentenceTransformer(self.embedder_model)
         elapsed = time()
         print(f'*** OADED SUCCESSFULY in {elapsed - self.start}: Embeding MOdel: {self.embedder_model}')
-        self.client = chromadb.PersistentClient(path="data/embeddings")
+        self.client = chromadb.PersistentClient(path=rag_config['EMBEDDING_FOLDER'])
         self.collection = self.client.get_or_create_collection(self.collection_name)
         self.results = []
+        print("Count: ", self.collection.count())
     
-    def retrive(self, n_result: int=5):
+    def retrive(self):
         query_embedding = self.embedder.encode([self.query], normalize_embeddings=True)[0]  # [0] to get vector not list of list
         results = self.collection.query(
             query_embeddings=[query_embedding],
-            n_results=n_result
+            n_results=self.n_result
             )
         self.results = results
         # self.query = query_embedding
         with open('logs/rag.json', 'w') as f:
             json.dump(results, f)
         del self.embedder_model, self.embedder, self.collection, self.client, self.collection_name
+        return results
     
     def rerank(self, query: str=None, docs:list=None):
         if not query:
@@ -75,14 +77,20 @@ class QueryRag():
             ranked = sorted([(doc, score) for doc, score in zip(docs, scores) if score >= rag_config['RAG_THRESHOLD']]
                             ,key=lambda x: x[1],reverse=True)
             elapsed = time() - start
+            self.results = []
             for i, (doc, score) in enumerate(ranked, 1):
                 print(f"{i}. Similarity: {score:.4f}")
                 print(f"{confidence_label(score)} | {score:.4f}")
                 print(f"Document: {doc[:200]}...")
                 print("-" * 80)
+                rank = {i:f'{score:.4f}', 'confidence_label':f'{confidence_label(score)} | {score:.4f}',
+                        'document':f'{doc[:200]}...', 'end':'-'*80}
+                self.results.append(rank)
                 if not ranked:
                     print(f"No results above threshold ({rag_config['RAG_THRESHOLD']})")
             print(f'*** Reranking Successfully Finished in {elapsed:.2f}  Sec')
+            
+            
 
     
     def report_retrieval(self, model_name_or_path="./models/base/embedding/bge-m3"):

@@ -2,6 +2,7 @@
 MODEL_PATH : "./models/base/embedding/bge-m3"
 QMODEL_PATH : "./models/quantized/qwen3_1.7b-Q4_K_M.gguf"
 EMBEDDING_MODEL : "./models/base/embedding/bge-m3"
+# EMBEDDING_MODEL : "./models/base/embedding/Qwen3-Embedding-0.6B"
 RERANKER_MODEL : "models/base/reranker/bge-reranker-v2-m3"
 EMBEDDING_FOLDER : 'data/embeddings'
 INPUT_FOLDER : "./data/raw/"        # Folder with PDFs / text files
