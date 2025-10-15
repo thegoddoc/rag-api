@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 from time import time
-from sentence_transformers import SentenceTransformer, CrossEncoder
-import chromadb
+from sentence_transformers import CrossEncoder
+# import chromadb
 from configs.config import rag_config
 import psutil
 from sklearn.preprocessing import normalize
@@ -22,19 +22,23 @@ def confidence_label(score):
         return "❌ Irrelevant"
     
 class QueryRag():
-    def __init__(self, query, n_result:int=5):
+    def __init__(self, query,embedder,reranker, client, collection, n_result:int=5):
         self.start = time()
         self.n_result = n_result
-        self.embedder_model = rag_config['EMBEDDING_MODEL']
+        # self.embedder_model = rag_config['EMBEDDING_MODEL']
         self.query = query
-        self.collection_name = rag_config['COLLECTION_NAME']
+        # self.collection_name = rag_config['COLLECTION_NAME']
         # chroma_client = chromadb.PersistentClient(path="data/embeddings")
-        print(f'*** Loading Embeding MOdel: {Path(self.embedder_model).name}')
-        self.embedder = SentenceTransformer(self.embedder_model)
+        # print(f'*** Loading Embeding MOdel: {Path(self.embedder_model).name}')
+        # self.embedder = SentenceTransformer(self.embedder_model)
+        self.embedder = embedder
+        self.reranker = reranker
         elapsed = time()
-        print(f'*** OADED SUCCESSFULY in {elapsed - self.start}: Embeding MOdel: {self.embedder_model}')
-        self.client = chromadb.PersistentClient(path=rag_config['EMBEDDING_FOLDER'])
-        self.collection = self.client.get_or_create_collection(self.collection_name)
+        # print(f'*** OADED SUCCESSFULY in {elapsed - self.start}: Embeding MOdel: {self.embedder_model}')
+        # self.client = chromadb.PersistentClient(path=rag_config['EMBEDDING_FOLDER'])
+        self.client = client
+        # self.collection = self.client.get_or_create_collection(self.collection_name)
+        self.collection = collection
         self.results = []
         print("Count: ", self.collection.count())
     
@@ -48,7 +52,7 @@ class QueryRag():
         # self.query = query_embedding
         with open('logs/rag.json', 'w') as f:
             json.dump(results, f)
-        del self.embedder_model, self.embedder, self.collection, self.client, self.collection_name
+        # del self.embedder_model, self.embedder, self.collection, self.client, self.collection_name
         return results
     
     def rerank(self, query: str=None, docs:list=None):
@@ -61,18 +65,15 @@ class QueryRag():
             print('no Result please Retrive First !!')
         else:
             scores = self.results["distances"]
-            del self.results
+            # del self.results
             print(f'*** Reranking {len(docs)} Results')
-            model = rag_config['RERANKER_MODEL']
+            # model = rag_config['RERANKER_MODEL']
             # model = 'models/base/reranker/arabic-reranker'
-            print(f'*** Model {Path(model).name} LOading ***')
-            start = time()
-            reranker = CrossEncoder(model)
-            elapsed = time() - start
-            print(f'*** Model {model} Loaded in {elapsed:.2f} SEC ***')
+            # print(f'*** Model {Path(model).name} LOading ***')
+            
+            # print(f'*** Model {model} Loaded in {elapsed:.2f} SEC ***')
             pairs = [[query, d] for d in docs]
-            scores = reranker.predict(pairs)
-            del reranker
+            scores = self.reranker.predict(pairs)
             # ranked = sorted(zip(docs, scores), key=lambda x: x[1], reverse=True)
             ranked = sorted([(doc, score) for doc, score in zip(docs, scores) if score >= rag_config['RAG_THRESHOLD']]
                             ,key=lambda x: x[1],reverse=True)
