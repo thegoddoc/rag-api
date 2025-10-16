@@ -73,6 +73,7 @@ class QueryRag():
             
             # print(f'*** Model {model} Loaded in {elapsed:.2f} SEC ***')
             pairs = [[query, d] for d in docs]
+            start = time()
             scores = self.reranker.predict(pairs)
             # ranked = sorted(zip(docs, scores), key=lambda x: x[1], reverse=True)
             ranked = sorted([(doc, score) for doc, score in zip(docs, scores) if score >= rag_config['RAG_THRESHOLD']]
