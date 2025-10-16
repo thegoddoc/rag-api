@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: rag_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./app:/app/app
+    environment:
+      - CHROMA_HOST=chroma
+      - CHROMA_PORT=8001
+    depends_on:
+      - chroma
+    restart: always
+
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: chroma_db
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./data/embeddings:/data
+    restart: always
