@@ -7,4 +7,6 @@ class QueryRequest(BaseModel):
 
 class QueryMode(BaseModel):
     moode : Literal["retrive", "rerank", "report"]
-    
+
+class IngestRequest(BaseModel):
+    batch_size: int = 3 

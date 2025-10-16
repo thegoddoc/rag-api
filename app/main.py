@@ -1,13 +1,15 @@
-import sys
+import sys, os
+import gc
 import uvicorn 
 from time import time
-from fastapi import FastAPI, BackgroundTasks, UploadFile, File
+from fastapi import FastAPI, BackgroundTasks, UploadFile, File,HTTPException
 from threading import Thread
 from contextlib import asynccontextmanager
 from configs.config import rag_config
 from scripts.query_rag import QueryRag
-from scripts.pydant import QueryRequest, QueryMode
-
+from scripts.build_index import VectoreStore
+from scripts.pydant import QueryRequest, QueryMode, IngestRequest
+from api import upload
 
 
 
@@ -34,14 +36,17 @@ def load_resources():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global embedder, client, collection, reranker
     # Load the ML model
     thread = Thread(target=load_resources, daemon=True)
     thread.start()
     yield
     # Clean up the ML models and release the resources
-    embedder.clear(), client.clear(), collection.clear(), reranker.clear()
+    print("🧹 Cleaning up...")
+    del embedder, client, collection, reranker
+    gc.collect()
 
-app = FastAPI(title="RAG FastAPI Demo", lifespan=lifespan)
+
 start = time()
 embedder_model = rag_config['EMBEDDING_MODEL']
 collection_name = rag_config['COLLECTION_NAME']
@@ -50,6 +55,8 @@ client = None
 collection = None
 reranker = None
 
+app = FastAPI(title="RAG FastAPI Demo", lifespan=lifespan)
+app.include_router(upload.router)
 
 # Open log file in append mode (so logs stack)
 # log_file = open("app.log", "a")
@@ -71,10 +78,8 @@ async def rag(query:QueryRequest, mode:QueryMode):
     while not embedder or not collection or not client or not embedder_model or not collection_name:
         for i in range(4):
             print(f'\r LOADING: {"."*i}',end=' ')
- 
-
-    
     print(f'EMBEDDER NOT READY yet')
+
     qr = QueryRag(query.query,embedder=embedder,
                    client=client, 
                    collection=collection,
@@ -91,6 +96,30 @@ async def rag(query:QueryRequest, mode:QueryMode):
         qr.report_retrieval()
     res = qr.results
     return {"Rssults": res}
+
+
+@app.post('/ingest')
+async def ingest(req:IngestRequest, background_tasks:BackgroundTasks):
+    # background_tasks.add_task(index_document, req.title, req.text, req.metadata)
+    background_tasks.add_task(build_index, req.batch_size)
+    return {"status":"accepted", "BATCH SIZE: ": req.batch_size}
+    # VectoreStore
+
+def build_index(batch_size:int):
+    vs = VectoreStore(embedder=embedder,
+                      vector_path=rag_config['EMBEDDING_FOLDER'],
+                      client=client,collection=collection , 
+                      collection_name=collection_name
+                      )
+    i = '.'
+    while not embedder:
+        for i in range(4):
+            print(f'\r LOADING: {"."*i}',end=' ')
+        print(f'EMBEDDER NOT READY yet')
+    vs.add_chunks(embedder=embedder, batch_size=batch_size)
+
+
+
 
 if __name__ == '__main__':
     # uvicorn.run(app,
