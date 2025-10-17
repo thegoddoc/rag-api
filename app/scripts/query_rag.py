@@ -50,7 +50,7 @@ class QueryRag():
             )
         self.results = results
         # self.query = query_embedding
-        with open('logs/rag.json', 'w') as f:
+        with open('app/logs/rag.json', 'w') as f:
             json.dump(results, f)
         # del self.embedder_model, self.embedder, self.collection, self.client, self.collection_name
         return results
@@ -111,7 +111,7 @@ class QueryRag():
         # --- Memory Snapshot ---
         mem_before = psutil.virtual_memory().used / (1024**2)
         start = time()
-        self.retrive(n_result=self.n_result)
+        self.retrive()
         elapsed = time() - start
         mem_after = psutil.virtual_memory().used / (1024**2)
         mem_delta = mem_after - mem_before
