@@ -208,6 +208,3 @@ __marimo__/
 
 data/processed/*
 data/embeddings/*
-app/models/base/*
-app/models/base/embedding/bge-m3/*
-app/models/base/reranker/bge-reranker-v2-m3/*
