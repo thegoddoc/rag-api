@@ -9,6 +9,7 @@ from contextlib import asynccontextmanager
 from app.configs.config import rag_config
 from app.scripts.query_rag import QueryRag
 from app.scripts.build_index import VectoreStore
+from app.scripts.preprocess import Preprocess
 from app.scripts.pydant import QueryRequest, QueryMode, IngestRequest
 from app.api import upload
 
@@ -119,7 +120,14 @@ def build_index(batch_size:int):
         print(f'EMBEDDER NOT READY yet')
     vs.add_chunks(embedder=embedder, batch_size=batch_size)
 
-
+@app.post("/process")
+async def preprocess(background_tasks:BackgroundTasks):
+    pr = Preprocess(INPUT_FOLDER=rag_config['INPUT_FOLDER'], embedder=embedder)
+    background_tasks.add_task(pr.Split_file_to_chunks)
+    files= pr.all_files()
+    print(f'\n*** {{len(files)}} FILE PROCESSING STARTED\n')
+    return {"status":f"{{len(files)}} FILE PROCESSING STARTED", "BATCH SIZE: ": len(files)}
+    
 
 
 if __name__ == '__main__':

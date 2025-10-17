@@ -1,7 +1,7 @@
 import os, re
 import fitz
 from langdetect import detect, DetectorFactory
-from configs.config import rag_config
+from app.configs.config import rag_config
 # -----------------------------
 # Utility Functions
 # -----------------------------

@@ -12,13 +12,13 @@ model_name = rag_config['EMBEDDING_MODEL']
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
 class Preprocess():
-    def __init__(self, INPUT_FOLDER:str):
+    def __init__(self, INPUT_FOLDER:str, embedder):
         print(f'PREPROCEssing *** OutputFOlder : {OUTPUT_FOLDER}')
         print(f'\n Starting PreProcessing of Data in DIrectory:{INPUT_FOLDER}\n')
         self.all_files = []
         self.input_directory = INPUT_FOLDER
         print(f'*** Loading Tokenizer ***')
-        self.tokenizer = SentenceTransformer(model_name).tokenizer
+        self.tokenizer = embedder.tokenizer
         self.config = rag_config
         
     # Read files
@@ -103,6 +103,8 @@ class Preprocess():
         print(f"Created {chunk_counter} chunks in {OUTPUT_FOLDER}.")
         
         return {"time_per item": time_per_item}
+    
+
     def log_processed_files(self):
         with open(rag_config['PROCESSED_FILES'],'r') as f:
             lst = json.load(f)
@@ -110,6 +112,7 @@ class Preprocess():
         with open(rag_config['PROCESSED_FILES'], 'w') as f:
             json.dump(names, f)
         print(f"ProCessed: {len(names)} Files Logged  to {rag_config['PROCESSED_FILES']}.")  
+
 
     def del_all_files(self):
         file_list = [file for file in self.all_files if Path(file).is_file()]
