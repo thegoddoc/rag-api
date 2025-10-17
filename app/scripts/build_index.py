@@ -1,17 +1,19 @@
 import os
 import json
+import pandas as pd
 from time import time
 from tqdm import tqdm
 from pathlib import Path
-from scripts import logger
-from scripts.logger import Logger
-from configs.config import rag_config
+from app.scripts.logger import Logger
+from app.configs.config import rag_config
 import chromadb
 from sentence_transformers import SentenceTransformer
 
 
 mod_name = 'build_index'
 processed_path = rag_config['OUTPUT_FOLDER']
+embedded_chunks = rag_config['EMBEDDED_CHUNKS']
+logger =Logger()
 #  store in chromadb
 class VectoreStore():
     def __init__(self,embedder, client, collection_name:str,collection, vector_path):
@@ -23,13 +25,11 @@ class VectoreStore():
         #  Future Replace split with Suffix os
         print(f'\n *** Start LOADING :  EMBEDDING_MODEL: {Path(model_path).name}')
         self.start = time()
-        
+
         elapsed = time() - self.start
         print(f'\n *** EMBEDDING_MODEL: {Path(model_path).name} Loaded Successfully in {elapsed} SEC ***')
-        
-    ## try UPsert if is chunk
-    #  
-    # ## Add Chunk
+   
+
     def add_chunks(self,embedder, chunks=None,  embeddings=None, batch_size:int=3, pr_path=processed_path):
         if chunks is None:
             chunks = self.chunks
@@ -53,8 +53,10 @@ class VectoreStore():
                            metadatas=batch_meta,
                            embeddings=batch_embeddings
                            )
+            logger.log_processed(batch_ids, 'embed')
         elapsed = time() - self.start
         print(f'**** REPORT:\n TOtal Time: {elapsed} \nTOtal Chunks: {len(chunks)} \nTOtal DIM : {len(batch_embeddings[0])}')
+        # return [f'TOtal Time: {elapsed}', 'TOtal Chunks: {len(chunks)}', 'TOtal DIM : {len(batch_embeddings[0])}']
      
     def embed_chunks(self,embedder, chunks: list, batch_: int=3):
         embeddings = []
@@ -68,7 +70,7 @@ class VectoreStore():
             elapsed = time() - start
             time_for_embed.append(elapsed)
             em += 1
-            Logger(mod_name, [f'{em} Chunks embedded in {time_for_embed[-1]} SEC'])
+            # Logger(mod_name, [f'{em} Chunks embedded in {time_for_embed[-1]} SEC'])
         return {'embeddings':embeddings,'time_forembed': time_for_embed}
     
     def load_chunks(self, proceede_path):
@@ -80,21 +82,23 @@ class VectoreStore():
         metadatas=[]
         # all_embeddings = []
         #  9 batch for Testing **************
-        for filename in tqdm(os.listdir(processed_dir)[:9]):
+        existing_ids = set(pd.read_csv(embedded_chunks)['file_name'])
+        for filename in tqdm(os.listdir(processed_dir)[:20]):
             if filename.endswith(".json"):
                 with open(os.path.join(processed_dir, filename), "r", encoding="utf-8") as f:
                     doc = json.load(f)
                 # print(doc)
-                # add ids to list 
-                all_ids.append(doc['id'])
-                all_docs.append(doc['text'])
-                # all_embeddings.append(np.array(doc["embedings"]))
-                metadatas.append({"source": doc["source_file"],
+                if doc['id'] not in existing_ids:
+                    # add ids to list
+                    all_ids.append(doc['id'])
+                    all_docs.append(doc['text'])
+                    # all_embeddings.append(np.array(doc["embedings"]))
+                    metadatas.append({"source": doc["source_file"],
                                   "category": doc["category"],
                                   "language": doc["language"],
                                   "tokens": doc["tokens"]
                                   })
-        
+                    
         # print(f'DOcs: {doc}')
         # Add to vector store
         return {"ids":all_ids, "docs":all_docs, "metas":metadatas}

@@ -1,17 +1,19 @@
 
-MODEL_PATH : "./models/base/embedding/bge-m3"
-QMODEL_PATH : "./models/quantized/qwen3_1.7b-Q4_K_M.gguf"
-EMBEDDING_MODEL : "./models/base/embedding/bge-m3"
+MODEL_PATH : "app/models/base/embedding/bge-m3"
+QMODEL_PATH : "app/models/quantized/qwen3_1.7b-Q4_K_M.gguf"
+EMBEDDING_MODEL : "app/models/base/embedding/bge-m3"
 # EMBEDDING_MODEL : "./models/base/embedding/Qwen3-Embedding-0.6B"
-RERANKER_MODEL : "models/base/reranker/bge-reranker-v2-m3"
+RERANKER_MODEL : "app/models/base/reranker/bge-reranker-v2-m3"
 EMBEDDING_FOLDER : 'data/embeddings'
 INPUT_FOLDER : "./data/raw/"        # Folder with PDFs / text files
 OUTPUT_FOLDER : "./data/processed/"  # Folder to save JSON chunks
-PROCESSED_FILES : "logs/processed_log.json" # LIST of PROCESSED FILES. IN RAW FOLDER
 MAX_TOKENS : 700
 OVERLAP_TOKENS : 150
-ERROR_RAG_LOG : "logs/rag.json" 
+ERROR_RAG_LOG : "app/logs/rag.json" 
 RAG_THRESHOLD : 0.0
-BUILD_INDEX : 'logs/build_index.json'
-COLLECTION_NAME : 'pharmacy_rag'
+BUILD_INDEX : "app/logs/build_index.json"
+COLLECTION_NAME : "pharmacy_rag"
+EMBEDDED_CHUNKS : "app/logs/embedded_chunks.csv"
+PROCESSED_FILES : "app/logs/processed_files.csv" # LIST of PROCESSED FILES. IN RAW FOLDER
+
 

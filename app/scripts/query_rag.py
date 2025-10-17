@@ -3,7 +3,7 @@ from pathlib import Path
 from time import time
 from sentence_transformers import CrossEncoder
 # import chromadb
-from configs.config import rag_config
+from app.configs.config import rag_config
 import psutil
 from sklearn.preprocessing import normalize
 

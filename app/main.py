@@ -5,11 +5,12 @@ from time import time
 from fastapi import FastAPI, BackgroundTasks, UploadFile, File,HTTPException
 from threading import Thread
 from contextlib import asynccontextmanager
-from configs.config import rag_config
-from scripts.query_rag import QueryRag
-from scripts.build_index import VectoreStore
-from scripts.pydant import QueryRequest, QueryMode, IngestRequest
-from api import upload
+
+from app.configs.config import rag_config
+from app.scripts.query_rag import QueryRag
+from app.scripts.build_index import VectoreStore
+from app.scripts.pydant import QueryRequest, QueryMode, IngestRequest
+from app.api import upload
 
 
 

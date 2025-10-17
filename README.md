@@ -95,3 +95,72 @@ print(response.json())
 ```
 
 
+## ⚡ Step 3: Build and Run WIth DOcker
+### 🐳 Step 1 — Install Docker Engine (Recommended) EXAMPLE (LINUX MINT)
+Run these commands one by one in your terminal:
+```bash
+
+# 1. Remove the broken Docker repo
+sudo rm /etc/apt/sources.list.d/docker.list 2>/dev/null
+
+# 2. Add the correct Docker GPG key
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# 3. Add Docker repo manually (force to Ubuntu noble)
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] \
+  https://download.docker.com/linux/ubuntu noble stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
+```bash
+# 4. Update package list
+sudo apt update
+
+# 5. Install Docker CE and Compose
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+
+```
+
+
+
+### From project root (rag-fastapi/):
+```bash
+sudo docker compose build
+docker compose up
+```
+
+Now open:
+👉 http://127.0.0.1:8000/docs
+Your FastAPI RAG API runs inside Docker, connected to ChromaDB.
+
+
+## 🧠 Step 4: Stop / Rebuild
+```bash
+docker compose down        # stop containers
+docker compose up -d       # restart in background
+docker compose build --no-cache   # rebuild everything
+```
+
+## 🐳 If you Want to REMOVE Docker container/image 
+Check what’s running:
+```bash
+docker ps -a
+```
+Then remove the container:
+```bash
+docker rm -f rag-api-api
+```
+And if you want to remove the image too:
+```bash
+docker rmi rag-api-api
+```
+
+To remove all containers and images:
+```bash
+docker rm -f $(docker ps -aq)
+docker rmi -f $(docker images -q)
+```
+
+

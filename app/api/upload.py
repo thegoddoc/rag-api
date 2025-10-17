@@ -1,5 +1,5 @@
 from fastapi import APIRouter, File, UploadFile, HTTPException
-from configs.config import rag_config
+from app.configs.config import rag_config
 import os
 from pathlib import Path
 

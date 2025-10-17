@@ -2,8 +2,8 @@ import os, re, glob, json
 import fitz 
 from tqdm import tqdm
 from time import time
-from configs.config import *
-from scripts.pre_utills import *
+from app.configs.config import *
+from app.scripts.pre_utills import *
 from sentence_transformers import SentenceTransformer
 from typing import List
 
