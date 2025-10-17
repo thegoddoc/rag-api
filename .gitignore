@@ -208,7 +208,8 @@ __marimo__/
 
 data/processed/*
 data/*
-data
-app/models/base/*
+./data/
+app/models/base/
 app/models/
 .venv/*
+./app/models/base/
