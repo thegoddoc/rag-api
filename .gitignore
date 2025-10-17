@@ -213,3 +213,4 @@ app/models/base/
 app/models/
 .venv/*
 ./app/models/base/
+data/embeddings/*
